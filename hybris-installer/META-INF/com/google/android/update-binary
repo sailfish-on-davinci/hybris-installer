@@ -128,11 +128,14 @@ log "Extracting package '$ZIPFILE'..."
 mkdir -p $FILES/
 unzip -o "$ZIPFILE" -x META-INF/* -d $FILES/
 
+log "Patching TWRP's broken tar..."
+(cp $FILES/tar /sbin/tar && chmod 777 /sbin/tar) || abort 8 "Couldn't patch tar!"
+
 log "Extracting SFOS rootfs..."
 ARCHIVE="$FILES/sfos-rootfs.tar.bz2"
 rm -rf $ROOT/
 mkdir -p $ROOT/
-/system/bin/toybox tar -xj -f $ARCHIVE -C $ROOT/ || abort 10 "Couldn't extract SFOS rootfs!"
+tar --numeric-owner -xvjf $ARCHIVE -C $ROOT/ || abort 9 "Couldn't extract SFOS rootfs!"
 rm $ARCHIVE
 
 log "Disabling forced encryption in vendor fstab..."
