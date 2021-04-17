@@ -24,7 +24,7 @@ ui_print() { [ -z "$1" ] && echo -e "ui_print  \nui_print" > $OUTFD || echo -e "
 log() { echo "hybris-installer: $@"; }
 
 # Remove package residue files from /tmp and unmount partitions
-cleanup() { log "Cleaning up..."; umount /system; rm -rf $FILES/; }
+cleanup() { log "Cleaning up..."; umount /system_root; rm -rf $FILES/; }
 
 # Before quitting with an exit code ($1), show a message ($2)
 abort() { ui_print "E$1: $2"; cleanup; exit $1; }
@@ -60,7 +60,7 @@ mount | grep -q "/data.*ext4" || abort 3 "Data is NOT formatted as ext4; check o
 [ -r $PARTITION_VENDOR ] || abort 4 "A vendor partition doesn't exist; you need to do an OTA from OxygenOS 5.1.5 to 5.1.6!"
 
 # Android
-(mount | grep -q /system || mount /system) || abort 5 "Couldn't mount /system!"
+(mount | grep -q /system_root || mount /system_root) || abort 5 "Couldn't mount /system!"
 if [ `cat /system/build.prop | grep lineage.build.version= | cut -d'=' -f2` != "$TARGET_LOS_VER" ]; then
 	if [ ! -f /tmp/sfos_flash_confirm ]; then
 		touch /tmp/sfos_flash_confirm
@@ -68,7 +68,6 @@ if [ `cat /system/build.prop | grep lineage.build.version= | cut -d'=' -f2` != "
 	fi
 	log "About to perform forced flash of SFOS"
 fi
-[ -f /system/bin/toybox ] || abort 8 "Your ROM doesn't ship with toybox; extracting of SFOS rootfs isn't possible!"
 if [ -f $ROOT/etc/os-release ]; then
 	if [ ! -f /tmp/sfos_fresh_confirm ]; then
 		touch /tmp/sfos_fresh_confirm
@@ -129,13 +128,13 @@ mkdir -p $FILES/
 unzip -o "$ZIPFILE" -x META-INF/* -d $FILES/
 
 log "Patching TWRP's broken tar..."
-(cp $FILES/tar /sbin/tar && chmod 777 /sbin/tar) || abort 8 "Couldn't patch tar!"
+(chmod 777 $FILES/tar) || abort 8 "Couldn't patch tar!"
 
 log "Extracting SFOS rootfs..."
 ARCHIVE="$FILES/sfos-rootfs.tar.bz2"
 rm -rf $ROOT/
 mkdir -p $ROOT/
-tar --numeric-owner -xvjf $ARCHIVE -C $ROOT/ || abort 9 "Couldn't extract SFOS rootfs!"
+$FILES/tar --numeric-owner -xvjf $ARCHIVE -C $ROOT/ || abort 9 "Couldn't extract SFOS rootfs!"
 rm $ARCHIVE
 
 log "Disabling forced encryption in vendor fstab..."
