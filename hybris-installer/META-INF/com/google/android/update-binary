@@ -161,7 +161,7 @@ elif [ -f /tmp/droid-boot.img ]; then
 fi
 
 log "Writing hybris-boot image..."
-dd if=$ROOT/boot/hybris-boot.img of=$PARTITION_BOOT bs=4m || abort 11 "Couldn't write Hybris boot image!"
+dd if=$ROOT/boot/hybris-boot.img of=$PARTITION_BOOT || abort 11 "Couldn't write Hybris boot image!"
 
 log "Symlinking boot images to /sdcard..."
 ln -s $ROOT/boot/droid-boot.img /sdcard/
