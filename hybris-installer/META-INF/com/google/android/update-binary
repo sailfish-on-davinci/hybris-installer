@@ -24,7 +24,7 @@ ui_print() { [ -z "$1" ] && echo -e "ui_print  \nui_print" > $OUTFD || echo -e "
 log() { echo "hybris-installer: $@"; }
 
 # Remove package residue files from /tmp and unmount partitions
-cleanup() { log "Cleaning up..."; umount /system_root; rm -rf $FILES/; }
+cleanup() { log "Cleaning up..."; umount /system; rm -rf $FILES/; }
 
 # Before quitting with an exit code ($1), show a message ($2)
 abort() { ui_print "E$1: $2"; cleanup; exit $1; }
@@ -60,7 +60,7 @@ mount | grep -q "/data.*ext4" || abort 3 "Data is NOT formatted as ext4; check o
 [ -r $PARTITION_VENDOR ] || abort 4 "A vendor partition doesn't exist; you need to do an OTA from OxygenOS 5.1.5 to 5.1.6!"
 
 # Android
-(mount | grep -q /system_root || mount /system_root) || abort 5 "Couldn't mount /system!"
+(mount | grep -q /system || mount /system) || abort 5 "Couldn't mount /system!"
 if [ `cat /system/build.prop | grep lineage.build.version= | cut -d'=' -f2` != "$TARGET_LOS_VER" ]; then
 	if [ ! -f /tmp/sfos_flash_confirm ]; then
 		touch /tmp/sfos_flash_confirm
